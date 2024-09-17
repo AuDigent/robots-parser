@@ -6,7 +6,7 @@ The parser currently supports:
 
 -   User-agent:
 -   Allow:
--   Disallow:
+-   Disallow (with explicit mode):
 -   Sitemap:
 -   Crawl-delay:
 -   Host:
@@ -41,6 +41,7 @@ var robots = robotsParser('http://www.example.com/robots.txt', [
 robots.isAllowed('http://www.example.com/test.html', 'Sams-Bot/1.0'); // true
 robots.isAllowed('http://www.example.com/dir/test.html', 'Sams-Bot/1.0'); // true
 robots.isDisallowed('http://www.example.com/dir/test2.html', 'Sams-Bot/1.0'); // true
+robots.isDisallowed('http://www.example.com/dir/test2.html', 'Sams-Bot/1.0', true); // false
 robots.getCrawlDelay('Sams-Bot/1.0'); // 1
 robots.getSitemaps(); // ['http://example.com/sitemap.xml']
 robots.getPreferredHost(); // example.com
@@ -54,11 +55,12 @@ Returns true if crawling the specified URL is allowed for the specified user-age
 
 This will return `undefined` if the URL isn't valid for this robots.txt.
 
-### isDisallowed(url, [ua])
+### isDisallowed(url, [ua], [explicit])
 
 **boolean or undefined**
 
 Returns true if crawling the specified URL is not allowed for the specified user-agent.
+In explicit mode, user agents wildcards are discared.
 
 This will return `undefined` if the URL isn't valid for this robots.txt.
 
@@ -93,7 +95,7 @@ Returns an array of sitemap URLs specified by the `sitemap:` directive.
 Returns the preferred host name specified by the `host:` directive or null if there isn't one.
 
 # Changes
-
+ 
 ### Version 3.0.1
 
 -   Fixed bug with `https:` URLs defaulting to port `80` instead of `443` if no port is specified.

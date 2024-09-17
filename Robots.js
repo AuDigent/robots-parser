@@ -428,9 +428,39 @@ Robots.prototype.getMatchingLineNumber = function (url, ua) {
  * @param  {string}  ua
  * @return {boolean}
  */
-Robots.prototype.isDisallowed = function (url, ua) {
+Robots.prototype.isDisallowed = function (url, ua, explicit) {
+	if (explicit === true) {
+		if (ua === undefined) {
+			throw new Error("User agent must be specified in explicit mode")
+		}
+		return this.isExplicitlyDisallowed(url, ua)
+	}
 	return !this.isAllowed(url, ua);
 };
+
+Robots.prototype.isExplicitlyDisallowed = function(url, ua) {	
+	var parsedUrl = parseUrl(url) || {};
+	var userAgent = formatUserAgent(ua);
+
+	// The base URL must match otherwise this robots.txt is not valid for it.
+	if (
+		parsedUrl.protocol !== this._url.protocol ||
+		parsedUrl.hostname !== this._url.hostname ||
+		parsedUrl.port !== this._url.port
+	) {
+		return;
+	}
+
+	var rules = this._rules[userAgent] || [];
+	var path = urlEncodeToUpper(parsedUrl.pathname + parsedUrl.search);
+	var rule = findRule(path, rules);
+
+	if (typeof rule === 'undefined') {
+		return;
+	}
+
+	return !(!rule || rule.allow);
+}
 
 /**
  * Gets the crawl delay if there is one.
